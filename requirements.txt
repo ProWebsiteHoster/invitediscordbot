@@ -1,8 +1,1 @@
-<<<<<<< HEAD
-discord.py>=2.3.0
-python-dotenv
-flask
-=======
-discord.py
-flask
->>>>>>> e19b6c4e69b6a952b91380c73de41a85ca840d39
+flask==2.1.0
