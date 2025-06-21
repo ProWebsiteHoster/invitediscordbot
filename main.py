@@ -1,40 +1,36 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-import os
 from dotenv import load_dotenv
 from keep_alive import keep_alive
+import os
 
-# Set environment variable for Render port
+# Set default port for Render if needed
 os.environ["PORT"] = "8080"
 
-# Load .env for token
+# Load token from .env
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
+# Intents
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
 intents.members = True
 
-# Invite data dictionary
+# Invite data store
 invite_data = {}
 
+# Bot setup
 class MyBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents)
-        self.tree = app_commands.CommandTree(self)
 
     async def setup_hook(self):
+        await self.load_extension("cogs.invites")
+        await self.load_extension("cogs.tickets")
         await self.tree.sync()
         print("✅ Slash commands synced.")
-        # Load extensions (cogs)
-        try:
-            await self.load_extension("cogs.invites")
-            await self.load_extension("cogs.tickets")
-            print("✅ Cogs loaded successfully.")
-        except Exception as e:
-            print(f"❌ Error loading cogs: {e}")
 
 bot = MyBot()
 
@@ -42,11 +38,10 @@ bot = MyBot()
 async def on_ready():
     print(f'✅ Bot is online as {bot.user}')
 
-# Function to get invite count
+# Invite count logic
 async def get_invite_count(member):
     invites = await member.guild.invites()
-    total = sum(invite.uses for invite in invites if invite.inviter == member)
-    return total
+    return sum(invite.uses for invite in invites if invite.inviter == member)
 
 # /checkinvites
 @bot.tree.command(name="checkinvites", description="Check valid and all-time invites")
@@ -100,16 +95,18 @@ async def resetinvites(interaction: discord.Interaction, member: discord.Member)
         f"📊 Old invites are now counted in 'All Time Invites'."
     )
 
-# Error for missing permission on /resetinvites
+# Error handler for /resetinvites
 @resetinvites.error
 async def resetinvites_error(interaction: discord.Interaction, error):
     if isinstance(error, app_commands.errors.MissingAnyRole):
         await interaction.response.send_message("❌ You do not have permission to use this command.", ephemeral=True)
 
-# Keep-alive server for uptime
+# Uptime server
 keep_alive()
 
-# Run bot
-bot.run(TOKEN)
+# Run the bot
+if __name__ == "__main__":
+    bot.run(TOKEN)
+
 
 
