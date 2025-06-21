@@ -5,6 +5,9 @@ import os
 from dotenv import load_dotenv
 from keep_alive import keep_alive
 
+import os
+os.environ["PORT"] = "8080"
+
 # Load .env for token
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
@@ -108,5 +111,11 @@ async def load():
 
 bot.loop.create_task(load())
 
+import os
+
+if __name__ == "__main__":
+    import discord
+    from invitediscordbot.bot import run_bot  # adjust path if needed
+    run_bot()
 
 
